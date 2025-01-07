@@ -5,12 +5,16 @@ This is a FastAPI application with an SQLite database for viewing SDA hymns.
 ## Features
 
 - View a list of most SDA hymns (currently) with additional information.
+
   Parameters: `q (optional)`, `cateogries (optional)`, `limit )(default=100)`, `offset (default=0)`
+
   For example:
+
   - The key it is played in
   - The author
   - Date of publication
   - and more
+
 - Retrieve details of a specific hymn by hymn nu
 
 ## Requirements
