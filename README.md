@@ -4,8 +4,14 @@ This is a FastAPI application with an SQLite database for viewing SDA hymns.
 
 ## Features
 
-- View a list of SDA hymns
-- Retrieve details of a specific hymn by ID
+- View a list of most SDA hymns (currently) with additional information.
+  Parameters: `q (optional)`, `cateogries (optional)`, `limit )(default=100)`, `offset (default=0)`
+  For example:
+  - The key it is played in
+  - The author
+  - Date of publication
+  - and more
+- Retrieve details of a specific hymn by hymn nu
 
 ## Requirements
 
@@ -18,7 +24,7 @@ This is a FastAPI application with an SQLite database for viewing SDA hymns.
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/sda-hymns-api.git
+   git clone https://github.com/dev-murphy/sda-hymns-api.git
    cd sda-hymns-api
    ```
 
