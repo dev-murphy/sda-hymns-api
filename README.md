@@ -47,10 +47,7 @@ This is a FastAPI application with an SQLite database for viewing SDA hymns.
 ## Project Structure
 
 - `main.py`: The main entry point of the application.
-- `models.py`: Defines the database models.
-- `schemas.py`: Defines the Pydantic models for request and response.
-- `crud.py`: Contains the CRUD operations.
-- `database.py`: Database connection and setup.
+- `hymns.db`: The sqlite database with hymn information
 
 ## License
 
