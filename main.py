@@ -51,6 +51,10 @@ app.add_middleware(
 def on_startup():
     create_db_and_tables()
 
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to SDA Hymnal API"}
+
 @app.get("/hymns/")
 def read_hymns(
     session: SessionDep,
