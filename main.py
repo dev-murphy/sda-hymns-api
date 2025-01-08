@@ -100,3 +100,18 @@ def read_hymn(
     if not hymn:
         raise HTTPException(status_code=404, detail="Hymn not found")
     return hymn
+
+@app.get("/categories/")
+def read_categories(
+    session: SessionDep
+) -> list[str]:
+    categories = session.exec(select(Hymns.category).distinct()).all()
+    return categories
+
+@app.get("/subcategories/")
+def read_subcategories(
+    session: SessionDep
+) -> list[str]:
+    subcategories = session.exec(select(Hymns.subcategory).distinct()).all()
+    subcategories = [subcategory for subcategory in subcategories if subcategory is not None]
+    return subcategories
