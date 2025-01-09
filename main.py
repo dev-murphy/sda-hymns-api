@@ -22,6 +22,11 @@ class Hymns(SQLModel, table=True):
     composer: str = Field(nullable=True)
     author: str = Field(nullable=True)
 
+class HymnsPublic(SQLModel):
+    hymn_number: int = Field(primary_key=True)
+    title: str = Field(index=True)
+    stanzas: str
+    first_line: str | None = Field(nullable=True)
 
 sqlite_file_name = "hymns.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
@@ -95,6 +100,22 @@ async def read_hymns(
 
     count = session.scalar(select(func.count()).select_from(Hymns))
     return { "count": count, "hymns": result }
+
+@app.get("/hymns/all", response_model=list[HymnsPublic], response_model_exclude_unset=True)
+@limiter.limit("50/minute")
+async def read_all_hymns(
+    request: Request,
+    session: SessionDep
+) -> list[HymnsPublic]:
+    try:
+        hymns = session.exec(select(Hymns)).all()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal Server Error") from e
+
+    if not hymns:
+        raise HTTPException(status_code=404, detail="No hymns found")
+
+    return hymns
 
 @app.get("/hymns/{hymn_no}")
 @limiter.limit("50/minute")
