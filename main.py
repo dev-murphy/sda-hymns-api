@@ -1,7 +1,10 @@
 from typing import Annotated
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Field, Session, SQLModel, create_engine, col, select
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 class Hymns(SQLModel, table=True):
     hymn_number: int | None = Field(default=None, primary_key=True)
@@ -23,7 +26,6 @@ sqlite_url = f"sqlite:///{sqlite_file_name}"
 connect_args = {"check_same_thread": False}
 engine = create_engine(sqlite_url, connect_args=connect_args)
 
-
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
@@ -33,7 +35,11 @@ def get_session():
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 origins = [
     "http://localhost:5173",
@@ -56,7 +62,9 @@ def read_root():
     return {"message": "Welcome to SDA Hymnal API"}
 
 @app.get("/hymns/")
-def read_hymns(
+@limiter.limit("50/minute")
+async def read_hymns(
+    request: Request,
     session: SessionDep,
     categories: str | None = None,
     sort: str = "",
@@ -92,7 +100,9 @@ def read_hymns(
     return hymns
 
 @app.get("/hymns/{hymn_no}")
-def read_hymn(
+@limiter.limit("50/minute")
+async def read_hymn(
+    request: Request,
     hymn_no: int, 
     session: SessionDep
 ) -> Hymns:
@@ -102,14 +112,18 @@ def read_hymn(
     return hymn
 
 @app.get("/categories/")
-def read_categories(
+@limiter.limit("50/minute")
+async def read_categories(
+    request: Request,
     session: SessionDep
 ) -> list[str]:
     categories = session.exec(select(Hymns.category).distinct()).all()
     return categories
 
 @app.get("/subcategories/")
-def read_subcategories(
+@limiter.limit("50/minute")
+async def read_subcategories(
+    request: Request,
     session: SessionDep
 ) -> list[str]:
     subcategories = session.exec(select(Hymns.subcategory).distinct()).all()
