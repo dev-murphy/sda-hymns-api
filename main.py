@@ -73,7 +73,7 @@ async def read_hymns(
     categories: str | None = None,
     sort: str = "",
     offset: int = 0,
-    limit: Annotated[int, Query(le=10)] = 10,
+    limit: Annotated[int, Query(le=100)] = 10,
 ) -> dict[str, int | list[Hymns]]:
     statement = select(Hymns)
 
