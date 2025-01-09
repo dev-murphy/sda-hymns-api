@@ -9,24 +9,20 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-class Hymns(SQLModel, table=True):
-    hymn_number: int | None = Field(default=None, primary_key=True)
-    title: str = Field(index=True)
-    stanzas: str
-    category: str
-    subcategory: str = Field(nullable=True)
-    first_line: str = Field(nullable=True)
-    published_at: str = Field(nullable=True)
-    key: str = Field(nullable=True)
-    filename: str = Field(nullable=True)
-    composer: str = Field(nullable=True)
-    author: str = Field(nullable=True)
-
-class HymnsPublic(SQLModel):
+class HymnsBase(SQLModel):
     hymn_number: int = Field(primary_key=True)
     title: str = Field(index=True)
     stanzas: str
     first_line: str | None = Field(nullable=True)
+
+class Hymns(HymnsBase, table=True):
+    category: str
+    subcategory: str | None = Field(nullable=True)
+    published_at: str | None = Field(nullable=True)
+    key: str | None = Field(nullable=True)
+    filename: str | None = Field(nullable=True)
+    composer: str | None = Field(nullable=True)
+    author: str | None = Field(nullable=True)
 
 sqlite_file_name = "hymns.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
@@ -101,12 +97,12 @@ async def read_hymns(
     count = session.scalar(select(func.count()).select_from(Hymns))
     return { "count": count, "hymns": result }
 
-@app.get("/hymns/all", response_model=list[HymnsPublic], response_model_exclude_unset=True)
+@app.get("/hymns/all", response_model=list[HymnsBase], response_model_exclude_unset=True)
 @limiter.limit("50/minute")
 async def read_all_hymns(
     request: Request,
     session: SessionDep
-) -> list[HymnsPublic]:
+) -> list[HymnsBase]:
     try:
         hymns = session.exec(select(Hymns)).all()
     except Exception as e:
