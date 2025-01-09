@@ -68,16 +68,10 @@ async def read_hymns(
     session: SessionDep,
     categories: str | None = None,
     sort: str = "",
-    q: str = "",
     offset: int = 0,
-    limit: Annotated[int, Query(le=100)] = 100,
-) -> list[Hymns]:
+    limit: Annotated[int, Query(le=10)] = 10,
+) -> dict[str, int | list[Hymns]]:
     statement = select(Hymns)
-
-    if q.isdigit():
-        statement = statement.where(Hymns.hymn_number == int(q))
-    elif q != "":
-        statement = statement.where(col(Hymns.title).regexp_match(q, 'i'))
 
     if categories is not None:
         category_list = categories.split(":")
@@ -86,18 +80,18 @@ async def read_hymns(
         elif len(category_list) == 2:
             statement = statement.where(Hymns.category == category_list[0]).where(Hymns.subcategory == category_list[1])
     
-    sort_order = Hymns.hymn_number.asc()
-    if "Page Title (Asc)" in sort:
-        sort_order = Hymns.title.asc()
-    elif "Page Title (Desc)" in sort:
-        sort_order = Hymns.title.desc()
-    elif "Page No. (Desc)" in sort:
-        sort_order = Hymns.hymn_number.desc()
+    if sort == "Page Title (Asc)":
+        statement = statement.order_by(Hymns.title.asc())
+    elif sort == "Page Title (Desc)":
+        statement = statement.order_by(Hymns.title.desc())
+    elif sort == "Page No. (Desc)":
+        statement = statement.order_by(Hymns.hymn_number.desc())
+    
+    statement = statement.offset(offset).limit(limit)
+    result = session.exec(statement).all()
 
-    statement = statement.order_by(sort_order).offset(offset).limit(limit)
-
-    hymns = session.exec(statement).all()
-    return hymns
+    count = session.scalar(select(func.count()).select_from(Hymns))
+    return { "count": count, "hymns": result }
 
 @app.get("/hymns/{hymn_no}")
 @limiter.limit("50/minute")
