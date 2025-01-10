@@ -98,7 +98,7 @@ async def read_hymns(
 
     return { "count": count, "hymns": result }
 
-@app.get("/hymns/all", response_model=list[HymnsBase], response_model_exclude_unset=True)
+@app.get("/hymns/all", response_model=list[HymnsBase])
 @limiter.limit("50/minute")
 async def read_all_hymns(
     request: Request,
