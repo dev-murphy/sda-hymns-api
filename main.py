@@ -90,11 +90,11 @@ async def read_hymns(
         statement = statement.order_by(Hymns.title.desc())
     elif sort == "Page No. (Desc)":
         statement = statement.order_by(Hymns.hymn_number.desc())
-    
+
+    count = len(session.exec(statement).all())
     statement = statement.offset(offset).limit(limit)
     result = session.exec(statement).all()
 
-    count = session.scalar(select(func.count()).select_from(Hymns))
     return { "count": count, "hymns": result }
 
 @app.get("/hymns/all", response_model=list[HymnsBase], response_model_exclude_unset=True)
@@ -152,5 +152,4 @@ async def read_subcategories(
         .where(Hymns.subcategory.is_not(None))
         .distinct()).all()
 
-    print(subcategories)
     return subcategories
