@@ -47,7 +47,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 origins = [
     "http://localhost:5173",
-    "https://sda-hymns-api.vercel.app/"
+    "https://sda-hymns-app.vercel.app"
 ]
 
 app.add_middleware(
