@@ -132,7 +132,7 @@ async def read_categories(
     session: SessionDep
 ) -> list[str]:
     categories = session.exec(select(Hymns.category).distinct()).all()
-    return categories
+    return ["", *categories]
 
 @app.get("/subcategories/")
 @limiter.limit("50/minute")
