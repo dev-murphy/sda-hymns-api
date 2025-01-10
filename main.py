@@ -142,8 +142,8 @@ async def read_subcategories(
     category: str | None = Query(None, description="The category of the hymns to retrieve subcategories for")
 ) -> list[str]:
     if not category:
-        raise HTTPException(status_code=400, detail="The 'category' query parameter is required to retrieve subcategories")
-
+        return []
+        
     # Replace spaces with hyphens in the input category
     formatted_category = category.lower().replace(" ", "-")
 
