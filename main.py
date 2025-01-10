@@ -138,8 +138,19 @@ async def read_categories(
 @limiter.limit("50/minute")
 async def read_subcategories(
     request: Request,
-    session: SessionDep
+    session: SessionDep,
+    category: str | None = Query(None, description="The category of the hymns to retrieve subcategories for")
 ) -> list[str]:
-    subcategories = session.exec(select(Hymns.subcategory).distinct()).all()
-    subcategories = [subcategory for subcategory in subcategories if subcategory is not None]
+    if not category:
+        raise HTTPException(status_code=400, detail="The 'category' query parameter is required to retrieve subcategories")
+
+    # Replace spaces with hyphens in the input category
+    formatted_category = category.lower().replace(" ", "-")
+
+    subcategories = session.exec(select(Hymns.subcategory)
+        .where(func.lower(func.replace(col(Hymns.category), " ", "-")) == formatted_category)
+        .where(Hymns.subcategory.is_not(None))
+        .distinct()).all()
+
+    print(subcategories)
     return subcategories
