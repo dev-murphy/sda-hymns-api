@@ -153,4 +153,4 @@ async def read_subcategories(
         .where(Hymns.subcategory.is_not(None))
         .distinct()).all()
 
-    return ["", *subcategories]
+    return ["", *subcategories] if len(subcategories) != 0 else []
