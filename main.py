@@ -47,6 +47,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 origins = [
     "http://localhost:5173",
+    "http://localhost:4173",
     "https://sda-hymns-app.vercel.app"
 ]
 
